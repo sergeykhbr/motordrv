@@ -51,6 +51,7 @@ class DisplaySPI : public FwObject,
 
     // IDisplayInterface
     virtual void clearRegion(int x1, int y1, int x2, int y2, uint16_t clr);
+    virtual void drawRegion(int x1, int y1, int x2, int y2, uint16_t *buf);
     virtual void outputText24Line(const char *str, int linepos, int symbpos, uint32_t clr, uint32_t bkgclr);
     virtual void outputText16Line(const char *str, int linepos, int symbpos, uint32_t clr, uint32_t bkgclr);
 

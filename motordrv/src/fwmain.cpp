@@ -32,7 +32,7 @@ static void init_systick() {
     uint32_t t1;
 
     // SysClock at 72 MHz
-    t1 = system_clock_hz() / 2 / 100;   // 100 Hz, SysTick is 24-bits width
+    t1 = system_clock_hz() / 100;   // 100 Hz, SysTick is 24-bits width
     write32(&systick->RVR, t1);         // reload value
     write32(&systick->CVR, t1);         // current value
 
@@ -65,10 +65,10 @@ extern "C" int fwmain(int argcnt, char *args[]) {
             flag++;
             if (flag & 1) {
                 //gpio_pin_set(&RELAIS1);
-                gpio_pin_set(&RELAIS2);
+                //gpio_pin_set(&RELAIS2);
             } else {
                 //gpio_pin_clear(&RELAIS1);
-                gpio_pin_clear(&RELAIS2);
+                //gpio_pin_clear(&RELAIS2);
             }
         }
     }

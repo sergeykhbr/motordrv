@@ -29,7 +29,7 @@ extern void uart_early_init();
 uint32_t SystemCoreClock = 144000000;
 
 int system_clock_hz() {
-    int ret = 72000000;   // 
+    int ret = 144000000;   // 
     return ret;
 }
 

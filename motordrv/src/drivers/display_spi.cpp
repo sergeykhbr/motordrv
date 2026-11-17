@@ -75,6 +75,7 @@ DisplaySPI::DisplaySPI(const char *name) : FwObject(name) {
        | (0 << 0);   // [0] RXDMAEN: Rx buffer DMA ena
     write16(&SPI->CR2, t2);
 
+    // baudrate 36MHz / 32 = ~1MHz
     t2 = (0 << 15)    // [15] BIDIMODE: 0=2-line unidirectional, 1=1-linne bidirectional
        | (1 << 14)    // [14] BIDIOE: output enable in bidir mode
        | (0 << 13)    // [13] CRCEN: hardware CRC calc ena
@@ -110,11 +111,13 @@ void DisplaySPI::PostInit() {
 
 uint8_t DisplaySPI::write_byte(uint8_t byte) {
     SPI_registers_type *SPI = (SPI_registers_type *)SPI3_BASE;
+    gpio_pin_clear(&DISPLAY_CS);
     write16(&SPI->DR, byte);
     // SR[1] TXE: transmit buffer empty: 0=not empty; 1=empty
     // SR[7] BSY: Busy flag: 1 Tx buffer is not empty
     while ((read16(&SPI->SR) & 0x2) == 0) {}
     while ((read16(&SPI->SR) & 0x80)) {}
+    gpio_pin_set(&DISPLAY_CS);
     return read16(&SPI->DR);
 }
 
@@ -164,8 +167,6 @@ void DisplaySPI::set_address(uint16_t x1, uint16_t y1,
 }
 
 void DisplaySPI::clearRegion(int h1, int w1, int h2, int w2, uint16_t clr) {
-    //uint16_t *buf16 = &fb_[w1 * HEIGHT + h1];
-
     int Nh = h2 - h1;
     int Nw = w2 - w1;
 
@@ -174,6 +175,21 @@ void DisplaySPI::clearRegion(int h1, int w1, int h2, int w2, uint16_t clr) {
         for (int x = 0; x < Nh; x++) {
             write_data_poll(static_cast<uint8_t>(clr >> 8));
             write_data_poll(static_cast<uint8_t>(clr));
+        }
+        w1++;
+    }
+}
+
+void DisplaySPI::drawRegion(int h1, int w1, int h2, int w2, uint16_t *buf) {
+    uint8_t *b8 = reinterpret_cast<uint8_t*>(buf);
+    int Nh = h2 - h1;
+    int Nw = w2 - w1;
+
+    for (int y = 0; y < Nw; y++) {
+        set_address(h1, w1, h2, w1 + 1);
+        for (int x = 0; x < Nh; x++) {
+            write_data_poll(*b8++);
+            write_data_poll(*b8++);
         }
         w1++;
     }
@@ -230,6 +246,7 @@ void DisplaySPI::outputTextLine(const uint8_t *arr,
         chbuf = &arr[bytes_per_symb * (int)(*str - ' ')];
 
         symb2buff(chbuf, h1, w1, fontsz, fontsz/2, clr, bkgclr);
+        drawRegion(h1, w1, h2, w2, fb_);
 
         w1 += (uint8_t)(fontsz/2);
         w2 += (uint8_t)(fontsz/2);
