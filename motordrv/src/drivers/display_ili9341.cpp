@@ -159,5 +159,9 @@ void DisplaySPI::init_ili9341() {
 
     clearRegion(0, 0, HEIGHT, WIDTH, CLR_GOLD); 		// clear full screen
     outputText24Line("Hi!", 50, 60, CLR_BLUE, CLR_BLACK);
+    outputText24Line("1", 0, 0, CLR_BLUE, CLR_BLACK);
+    outputText24Line("2", 0, 320-12, CLR_BLUE, CLR_BLACK);
+    outputText24Line("3", 240-24, 0, CLR_BLUE, CLR_BLACK);
+    outputText24Line("4", 240-24, 320-12, CLR_BLUE, CLR_BLACK);
 }
 
